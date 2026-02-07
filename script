@@ -29,7 +29,7 @@ repeat
     wait()
 until game:GetService("Players").LocalPlayer.PlayerGui.LoadingScreen.Frames.Main:FindFirstChild("Play")
 
-wait(5)
+wait(1)
 
 camera.CFrame = CFrame.new(Vector3.new(-45, 0, 200), Vector3.new(-45, -1400, 0))
 
