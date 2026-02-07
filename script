@@ -1,0 +1,178 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+local backpack = player:WaitForChild("Backpack")
+local workspace = game.Workspace
+local httpservice = game:GetService("HttpService")
+local itemSpawnsFolder = workspace:FindFirstChild("Item_Spawns")
+local itemsFolder = itemSpawnsFolder and itemSpawnsFolder:FindFirstChild("Items")
+local remoteEvent = character:FindFirstChild("RemoteEvent")
+local teleportmodule = loadstring(game:HttpGet"https://raw.githubusercontent.com/radmin1337/serverhop/refs/heads/main/sh")()
+local queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
+local camera = workspace.CurrentCamera
+
+repeat
+    wait()
+until not player.PlayerGui.LoadingScreen1:FindFirstChild("SkipCutscene")
+
+wait(3)
+
+mousemoveabs(315, 760)
+mouse1click()
+
+wait(1)
+
+mousemoveabs(750, 890)
+mouse1click()
+
+repeat
+    wait()
+until game:GetService("Players").LocalPlayer.PlayerGui.LoadingScreen.Frames.Main:FindFirstChild("Play")
+
+wait(5)
+
+camera.CFrame = CFrame.new(Vector3.new(-45, 0, 200), Vector3.new(-45, -1400, 0))
+
+local count = 0
+
+local function teleportPlayerToCFrame(targetCFrame, speed)
+    local startCFrame = hrp.CFrame
+    local targetPosition = targetCFrame.Position
+    local distance = (targetPosition - startCFrame.Position).Magnitude
+    local moveTime = distance / speed
+    local totalDuration = math.max(moveTime, 0.5)
+    hrp.Anchored = true
+    local startTime = tick()
+
+    while tick() - startTime < totalDuration do
+        local elapsed = tick() - startTime
+        local alpha = elapsed / totalDuration
+        hrp.CFrame = startCFrame:Lerp(targetCFrame, alpha)
+        wait()
+    end
+    hrp.CFrame = targetCFrame
+    hrp.Anchored = false
+end
+
+local function FindAndActivateClosestModel()
+    local closestModel = nil
+    local closestDistance = math.huge
+
+    if itemsFolder then
+        for _, model in ipairs(itemsFolder:GetChildren()) do
+            if model:IsA("Model") then
+                local hasPointLight = false
+                for _, part in ipairs(model:GetDescendants()) do
+                    if part:IsA("PointLight") then
+                        hasPointLight = true
+                        break
+                    end
+                end
+                if hasPointLight then
+                    local parts = {}
+                    for _, part in ipairs(model:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            table.insert(parts, part.Position)
+                        end
+                    end
+                    local centerPos
+                    if #parts > 0 then
+                        local sum = Vector3.new()
+                        for _, pos in ipairs(parts) do
+                            sum = sum + pos
+                        end
+                        centerPos = sum / #parts
+                    else
+                        centerPos = model:GetModelCFrame().p
+                    end
+
+                    local distanceToPlayer = (centerPos - hrp.Position).Magnitude
+                    if distanceToPlayer < closestDistance then
+                        closestDistance = distanceToPlayer
+                        closestModel = model
+                    end
+                end
+            end
+        end
+    end
+
+    if closestModel then
+        local targetCFrame = CFrame.new(closestModel:GetModelCFrame().p)
+        teleportPlayerToCFrame(targetCFrame, 150)
+
+        local promptToPress = nil
+        for _, descendant in ipairs(closestModel:GetDescendants()) do
+            if descendant:IsA("ProximityPrompt") and descendant.Enabled then
+                promptToPress = descendant
+                break
+            end
+        end
+
+        if promptToPress then
+            wait(0.5)
+            promptToPress:InputHoldBegin()
+            wait(0.3)
+            promptToPress:InputHoldEnd()
+        end
+
+        wait(0.5)
+        EquipClosestTool()
+
+        return true
+    else
+		if count ~= 2 then
+			teleportPlayerToCFrame(CFrame.new(596, 3, -175), 150)
+			teleportPlayerToCFrame(CFrame.new(-625, -22, -467), 150)
+			teleportPlayerToCFrame(CFrame.new(-141, 3, -680), 150)
+			teleportPlayerToCFrame(CFrame.new(-136, 3, -111), 150)
+			teleportPlayerToCFrame(CFrame.new(-460, 3, -13), 150)
+			count = count + 1
+		else
+			pcall(function()
+				queueteleport(game:HttpGet("https://raw.githubusercontent.com/radmin1337/auto/refs/heads/main/auto"))
+			end)
+			
+			teleportmodule:Teleport(game.PlaceId)
+		end
+        return false
+    end
+end
+
+function EquipClosestTool()
+    local tools = {}
+    for _, item in pairs(backpack:GetChildren()) do
+        if item:IsA("Tool") then
+            table.insert(tools, item)
+        end
+    end
+
+    if #tools > 0 then
+        local tool = tools[1]
+        if tool then
+            player.Character.Humanoid:EquipTool(tool)
+        end
+    end
+end
+
+local function OnNewItemAdded(item)
+    EquipClosestTool()
+    remoteEvent:FireServer("EndDialogue", {
+        NPC = "Merchant",
+        Option = "Option2",
+        Dialogue = "Dialogue5",
+    })
+end
+
+backpack.ChildAdded:Connect(function(child)
+    wait(0.1)
+    OnNewItemAdded(child)
+end)
+
+for _, item in pairs(backpack:GetChildren()) do
+    OnNewItemAdded(item)
+end
+
+while true do
+    local success = pcall(FindAndActivateClosestModel)
+    wait(0.1)
+end
