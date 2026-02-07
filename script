@@ -129,7 +129,7 @@ local function FindAndActivateClosestModel()
 			count = count + 1
 		else
 			pcall(function()
-				queueteleport(game:HttpGet("https://raw.githubusercontent.com/radmin1337/auto/refs/heads/main/auto"))
+				queueteleport(game:HttpGet("https://raw.githubusercontent.com/radmin1337/yaf1/refs/heads/main/script"))
 			end)
 			
 			teleportmodule:Teleport(game.PlaceId)
