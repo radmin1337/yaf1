@@ -16,7 +16,7 @@ local camera = workspace.CurrentCamera
 local startTime2 = tick()
 
 local function CheckTime()
-    if tick() - startTime2 > 360 then
+    if tick() - startTime2 > 480 then
         pcall(function()
             queueteleport(game:HttpGet("https://raw.githubusercontent.com/radmin1337/yaf1/refs/heads/main/script"))
         end)
