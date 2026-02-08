@@ -39,9 +39,19 @@ end))
 
 --PLAY SCREEN SKIP
 
-wait(20)
+wait(10)
 
-mousemoveabs(315, 765)
+mouse1click()
+mouse1click()
+mouse1click()
+
+wait(1)
+
+mousemoveabs(140, 30)
+wait(1)
+mouse1click()
+
+mousemoveabs(315, 775)
 wait(1)
 mouse1click()
 
